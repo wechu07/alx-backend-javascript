@@ -1,14 +1,13 @@
-const app = require('../server');
+const express = require('express');
 const AppController = require('../controllers/AppController');
 const StudentsController = require('../controllers/StudentsController');
 
-app.get('/', (req, res) => {
-  AppController.getHomepage(req, res);
-});
-app.get('/students', (req, res) => {
-  StudentsController.getAllStudents(req, res, process.argv[2]);
-});
+const app = express();
 
-app.get('/students/:major', (req, res) => {
-  StudentsController.getAllStudentsByMajor(req, res, process.argv[2]);
-});
+app.get('/', ((request, response) => AppController.getHomepage(request, response)));
+app.get('/students', ((request, response) => StudentsController.getAllStudents(request, response)));
+app.get('/students/:major', ((request, response) => StudentsController.getAllStudentsByMajor(request, response)));
+
+// app.listen(1245);
+
+module.exports = app;

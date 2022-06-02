@@ -1,34 +1,40 @@
 const fs = require('fs');
 
-function readDatabase(path) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err, datatext) => {
-      if (err) {
-        reject(Error('Cannot load the database'));
-      } else {
-        const datatxt = datatext.split(/\r?\n/);
-        const data = [];
-        for (const i of datatxt) {
-          if (i !== '') {
-            data.push(i.split(','));
+const readDatabase = (path) => new Promise((resolve, reject) => {
+  fs.readFile(path, (error, csvData) => {
+    if (error) {
+      reject(Error('Cannot load the database'));
+    }
+    if (csvData) {
+      const fields = {};
+      const dataShow = {};
+      let data = csvData.toString().split('\n');
+      data = data.filter((element) => element.length > 0);
+
+      data.shift();
+      data.forEach((element) => {
+        if (element.length > 0) {
+          const row = element.split(',');
+          if (row[3] in fields) {
+            fields[row[3]].push(row[0]);
+          } else {
+            fields[row[3]] = [row[0]];
           }
         }
-        const idxFN = data[0].indexOf('firstname');
-        const idxFD = data[0].indexOf('field');
-        const dict = {};
-        for (const line of data) {
-          if (data.indexOf(line) !== 0) {
-            if (line[idxFD] in dict) {
-              dict[line[idxFD]].push(line[idxFN]);
-            } else {
-              dict[line[idxFD]] = [];
-              dict[line[idxFD]].push(line[idxFN]);
-            }
-          }
+      });
+      for (const field in fields) {
+        if (field) {
+          const list = fields[field];
+          dataShow[field] = {
+            list: `List: ${list.toString().replace(/,/g, ', ')}`,
+            number: list.length,
+          };
         }
-        resolve(dict);
       }
-    });
+
+      resolve(dataShow);
+    }
   });
-}
+});
+
 module.exports = readDatabase;
